@@ -5,6 +5,8 @@ OPENSBI_DIR := opensbi
 OBJS = \
   $K/entry.o \
   $K/start.o \
+  $K/main.o \
+  $K/sbi.o \
 
 # riscv64-unknown-elf- or riscv64-linux-gnu-
 # perhaps in /opt/riscv/bin
@@ -57,7 +59,7 @@ endif
 LDFLAGS = -z max-page-size=4096
 
 $K/kernel: $(OBJS) $K/kernel.ld
-	$(LD) $(LDFLAGS) -T $K/kernel.ld -o $K/kernel $(OBJS) 
+	$(LD) -T $K/kernel.ld -o $K/kernel $(OBJS) $(LDFLAGS)
 	$(OBJDUMP) -S $K/kernel > $K/kernel.asm
 	$(OBJDUMP) -t $K/kernel | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$$/d' > $K/kernel.sym
 
@@ -65,7 +67,7 @@ $K/kernel: $(OBJS) $K/kernel.ld
 CROSS_COMPILE := $(TOOLPREFIX)
 PLATFORM := generic
 
-$(OPENSBI_DIR)/build/platform/generic/firmware/fw_jump.bin: $K/kernel
+$(OPENSBI_DIR)/build/platform/generic/firmware/fw_jump.bin:
 	$(MAKE) -C $(OPENSBI_DIR) PLATFORM=$(PLATFORM) CROSS_COMPILE=$(CROSS_COMPILE)
 
 # Prevent deletion of intermediate files, e.g. cat.o, after first build, so
